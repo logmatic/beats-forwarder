@@ -3,7 +3,10 @@
 
 package config
 
+import "github.com/elastic/go-ucfg"
+
 type Config struct {
+	ucfg.Config
 	Input  InputConfig        `config:"input"`
 	Output OutputConfig       `config:"output"`
 }
