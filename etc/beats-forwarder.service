@@ -1,0 +1,12 @@
+[Unit]
+Description=beats-forwarder
+Documentation=https://github.com/logmatic/beats-forwarder
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/beats-forwarder -c /etc/beats-forwarder/config.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

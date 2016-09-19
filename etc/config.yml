@@ -1,0 +1,94 @@
+####
+#### beats-forwarder default configuration
+####
+
+input:
+
+  # The IP address to listen on
+  host: ${BFWD_HOST:"0.0.0.0"}
+
+  # The port to listen on
+  port: ${BFWD_HOST:5044}
+
+  # Keep-alive setting, by default 3 seconds
+  keepalive: ${BFWD_KEEPALIVE:3}
+
+  # Timeout setting, by default 30 seconds
+  timeout: ${BFWD_TIMEOUT:30}
+
+  # LumberJack protocol settingss
+  lj:
+    # By default, lj-v1 protocol is disabled.
+    V1: ${BFWD_LJ_V1:false}
+
+    # By default, lj-v2 protocol is enabled.
+    V2: ${BFWD_LJ_V2:true}
+
+  # Secure communication settings, if enabled, configure path for key and certificates.
+  tls:
+    # By default, TLS is disabled
+    enable: ${BFWD_ENABLE_TLS:false}
+
+    # Path to the ca file
+    ca_path: ${BFWD_ENABLE_TLS_CA_PATH}
+
+    # Path to the cert file
+    cert_path: ${BFWD_ENABLE_TLS_CERT_PATH}
+
+    # Path to the key file
+    key_path: ${BFWD_ENABLE_TLS_KEY_PATH}
+
+
+output:
+
+  # The wanted output, by default syslog
+  type: ${BFWD_OUTPUT_TYPE:syslog}
+
+  # UDP and TCP settings
+  udp_tcp:
+
+    # Protocol connection, if empty, the local syslog is used
+    network: ${BFWD_UDPTCP_NETWORK}
+
+    # The remote endpoint, only if a protocol has been specified
+    raddr: ${BFWD_UDPTCP_RADDR}
+
+    # Secure communication settings, if enabled, configure path for key and certificates.
+    tls:
+      # By default, TLS is disabled
+      enable: ${BFWD_ENABLE_TLS:false}
+
+      # Path to the ca file
+      ca_path: ${BFWD_ENABLE_TLS_CA_PATH}
+
+      # Path to the cert file
+      cert_path: ${BFWD_ENABLE_TLS_CERT_PATH}
+
+      # Path to the key file
+      key_path: ${BFWD_ENABLE_TLS_KEY_PATH}
+
+
+  # Syslog specific settings
+  syslog:
+    # Tag or application reported for each log
+    tag: ${BFWD_SYSLOG_TAG:beats-fowarder}
+
+    # Protocol connection, if empty, the local syslog is used
+    network: ${BFWD_SYSLOG_NETWORK}
+
+    # The remote endpoint, only if a protocol has been specified
+    raddr: ${BFWD_SYSLOG_RADDR}
+
+  # Logmatic specific settings
+  logmatic:
+
+    # The Logmatic API Key for authentification
+    key: ${BFWD_LOGMATIC_API_KEY}
+
+    # Protocol connection (tcp|ssl), by default ssl
+    network: ${BFWD_LOGMATIC_NETWORK:ssl}
+
+    # The remote endpoint
+    raddr: ${BFWD_LOGMATIC_RADDR:"api.logmatic.io:10515"}
+
+

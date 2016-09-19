@@ -1,0 +1,9 @@
+package: github.com/logmatic/beats-forwarder
+import:
+- package: github.com/elastic/go-lumber
+  version: v0.1.0
+  subpackages:
+  - server
+- package: github.com/elastic/go-ucfg
+  subpackages:
+  - yaml

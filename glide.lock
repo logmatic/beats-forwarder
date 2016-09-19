@@ -1,0 +1,28 @@
+hash: edde022c2e4d523beb91ad20768a21fbfbb675a81608b029bf7fc866f01f57ed
+updated: 2016-09-19T15:10:41.811964401+02:00
+imports:
+- name: github.com/elastic/go-lumber
+  version: 616041e345fc33c97bc0eb0fa6b388aa07bca3e1
+  subpackages:
+  - lj
+  - log
+  - protocol/v1
+  - protocol/v2
+  - server
+  - server/internal
+  - server/v1
+  - server/v2
+- name: github.com/elastic/go-ucfg
+  version: f68e111e1035a51815b85556e4682c1cb4009b58
+  subpackages:
+  - yaml
+- name: github.com/klauspost/compress
+  version: 08fe86a420401e830c24114bdf9f1ba91331407a
+  subpackages:
+  - flate
+  - zlib
+- name: github.com/klauspost/cpuid
+  version: 09cded8978dc9e80714c4d85b0322337b0a1e5e0
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+testImports: []
