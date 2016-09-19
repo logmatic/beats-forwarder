@@ -47,10 +47,10 @@ output:
   # UDP and TCP settings
   udp_tcp:
 
-    # Protocol connection, if empty, the local syslog is used
-    network: ${BFWD_UDPTCP_NETWORK}
+    # Protocol connection, by default tcp
+    network: ${BFWD_UDPTCP_NETWORK:tcp}
 
-    # The remote endpoint, only if a protocol has been specified
+    # The remote endpoint
     raddr: ${BFWD_UDPTCP_RADDR}
 
     # Secure communication settings, if enabled, configure path for key and certificates.
