@@ -9,6 +9,10 @@ import (
 	"errors"
 	"net"
 	"crypto/tls"
+
+	cfg "github.com/logmatic/beats-forwarder/config"
+	"io/ioutil"
+	"crypto/x509"
 )
 
 type Connection interface {
@@ -16,12 +20,13 @@ type Connection interface {
 	Close() (error)
 }
 
-type Socket struct {
-	conn    Connection
-	config  SocketConfig
+type SocketClient struct {
+	conn      Connection
+	config    *SocketConfig
+	tlsConfig *tls.Config
 
-	network string
-	raddr   string
+	network   string
+	raddr     string
 }
 
 type SocketConfig struct {
@@ -29,23 +34,52 @@ type SocketConfig struct {
 	maxBackoff int
 }
 
-func NewSocket(network string, raddr string, config SocketConfig) *Socket {
+func (c *SocketClient) Init(config *cfg.Config) {
 
-	socket := Socket{network: network, raddr: raddr}
-	socket.config = config
+	c.network = *config.Output.UDPTCP.Network
+	c.raddr = *config.Output.UDPTCP.Raddr
+	c.config = &SocketConfig{maxBackoff: 30, maxRetries: 10}
 
-	return &socket
+	if (config.Bool("output.udp_tcp.tls.enable", 0) == true) {
 
+		c.network = "tcp"
+		// load client cert
+		cert, err := tls.LoadX509KeyPair(*config.Output.UDPTCP.TlsConfig.CertPath, *config.Output.UDPTCP.TlsConfig.KeyPath)
+		if (err) {
+			fmt.Printf("%v", err)
+		}
+
+		// load CA
+		caCert, err := ioutil.ReadFile(*config.Output.UDPTCP.TlsConfig.CaPath)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		// get config
+		c.tlsConfig = &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			RootCAs:      caCertPool,
+		}
+		c.tlsConfig.BuildNameToCertificate()
+	} else {
+
+		c.tlsConfig = &tls.Config{}
+	}
+
+	//todo (gpolaert) handler errors and tls
 }
 
-func (socket *Socket) Connect() (error) {
+func (socket *SocketClient) Connect() (error) {
 
 	fmt.Fprintf(os.Stderr, "Connection to %s (%s)\n", socket.raddr, socket.network)
 
 	var conn Connection
 	var err error
 	if (socket.network == "tls" || socket.network == "ssl") {
-		conn, err = tls.Dial("tcp", socket.raddr, &tls.Config{})
+		conn, err = tls.Dial("tcp", socket.raddr, socket.tlsConfig)
 
 	} else {
 		conn, err = net.Dial(socket.network, socket.raddr)
@@ -58,12 +92,12 @@ func (socket *Socket) Connect() (error) {
 	return nil
 }
 
-func (socket *Socket) reconnect() (error) {
+func (socket *SocketClient) reconnect() (error) {
 	socket.Close()
 	return socket.Connect()
 }
 
-func (socket *Socket) WriteAndRetry(payload []byte) (error) {
+func (socket *SocketClient) WriteAndRetry(payload []byte) (error) {
 
 	for i := 0; i < socket.config.maxRetries; i++ {
 
@@ -104,7 +138,7 @@ func (socket *Socket) WriteAndRetry(payload []byte) (error) {
 	return errors.New(fmt.Sprintf("Failed to connect to %s (%s)", socket.raddr, socket.network))
 }
 
-func (socket *Socket) writeOnce(payload []byte) (error) {
+func (socket *SocketClient) writeOnce(payload []byte) (error) {
 
 	_, err := socket.conn.Write(payload)
 	if err != nil {
@@ -116,7 +150,7 @@ func (socket *Socket) writeOnce(payload []byte) (error) {
 
 }
 
-func (socket *Socket) Close() {
+func (socket *SocketClient) Close() {
 	socket.conn.Close()
 	socket.conn = nil
 }

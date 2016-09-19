@@ -5,21 +5,21 @@ import (
 )
 
 type LogmaticClient struct {
-	socket         *Socket
+	socket         *SocketClient
 	logmaticAPIKey string
 }
 
-func NewLogmaticClient() *LogmaticClient {
-	return &LogmaticClient{}
-}
 
 func (c *LogmaticClient) Init(config *cfg.Config) {
 
-	socketConfig := SocketConfig{maxBackoff: 30, maxRetries: 10}
 
 	//todo (gpolaert) handle config errors
 	c.logmaticAPIKey = *config.Output.Logmatic.Key + " "
-	c.socket = NewSocket(*config.Output.Logmatic.Network, *config.Output.Logmatic.Raddr, socketConfig)
+
+	socket := &SocketClient{network: *config.Output.Logmatic.Network, raddr: *config.Output.Logmatic.Raddr}
+	socket.config = SocketConfig{maxBackoff: 30, maxRetries: 10}
+
+	c.socket = socket
 }
 
 func (c *LogmaticClient) WriteAndRetry(payload []byte) (error) {
