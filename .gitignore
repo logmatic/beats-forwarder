@@ -6,3 +6,4 @@
 
 atlassian-ide-plugin.xml
 *.iml
+config-logmatic.yml
