@@ -9,28 +9,31 @@ import (
 	"time"
 
 	"github.com/elastic/go-lumber/server"
+
 	"github.com/logmatic/beats-forwarder/output"
 	cfg "github.com/logmatic/beats-forwarder/config"
+	"crypto/tls"
+	"io/ioutil"
+	"crypto/x509"
 )
-
 
 var Registry map[string]output.Output
 
 func init() {
 
-	registry := make(map[string]output.Output)
-	registry["syslog"] = &output.SyslogClient{}
-	registry["logmatic"] = &output.LogmaticClient{}
-	registry["udp_tcp"] = &output.LogmaticClient{}
+	Registry = make(map[string]output.Output)
+	Registry["syslog"] = &output.SyslogClient{}
+	Registry["logmatic"] = &output.LogmaticClient{}
+	Registry["udp_tcp"] = &output.SocketClient{}
+
 }
 
 func Run(config *cfg.Config) error {
 
-
-
 	outputType := *config.Output.Type
 
 	// start the remote connection
+	fmt.Printf("Register '%s' as the remote output\n", outputType)
 	remote, err := output.Run(Registry[outputType], config)
 	if err != nil {
 		return err
@@ -42,7 +45,8 @@ func Run(config *cfg.Config) error {
 		server.V1(*config.Input.LJ.V1),
 		server.V2(*config.Input.LJ.V2),
 		server.Keepalive(time.Duration(*config.Input.Keepalive) * time.Second),
-		server.Timeout(time.Duration(*config.Input.Timeout) * time.Second))
+		server.Timeout(time.Duration(*config.Input.Timeout) * time.Second),
+		server.TLS(digestTLSConfig))
 
 	if err != nil {
 		return err
@@ -78,5 +82,34 @@ func Run(config *cfg.Config) error {
 
 }
 
+func digestTLSConfig(config *cfg.Config) *tls.Config {
+
+	tlsConfig := &tls.Config{}
+	if (config.Bool("input.tls.enable", 0) == true) {
+
+		// load client cert
+		cert, err := tls.LoadX509KeyPair(*config.Input.TlsConfig.CertPath, *config.Input.TlsConfig.KeyPath)
+		if err != nil {
+			return tlsConfig
+		}
+
+		// load CA
+		caCert, err := ioutil.ReadFile(*config.Input.TlsConfig.CaPath)
+		if err != nil {
+			return tlsConfig
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		// get config
+		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.RootCAs = caCertPool
+
+		tlsConfig.BuildNameToCertificate()
+	}
+
+	return Input
+}
 
 
