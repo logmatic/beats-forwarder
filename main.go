@@ -2,9 +2,9 @@ package main
 
 import (
 	"os"
+	"fmt"
 	"github.com/logmatic/beats-forwarder/forwarder"
 	cfg "github.com/logmatic/beats-forwarder/config"
-	"fmt"
 )
 
 var config = cfg.Config{}
