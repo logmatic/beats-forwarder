@@ -2,17 +2,17 @@ package output
 
 import (
 	"fmt"
-	"os"
 	"time"
 	"math"
 	"sync"
-	"errors"
 	"net"
-	"crypto/tls"
 
-	cfg "github.com/logmatic/beats-forwarder/config"
+	"crypto/tls"
 	"io/ioutil"
 	"crypto/x509"
+
+	"github.com/Sirupsen/logrus"
+	cfg "github.com/logmatic/beats-forwarder/config"
 )
 
 type Connection interface {
@@ -34,25 +34,25 @@ type SocketConfig struct {
 	maxBackoff int
 }
 
-func (c *SocketClient) Init(config *cfg.Config) {
+func (c *SocketClient) Init(config *cfg.Config) error {
 
 	c.network = *config.Output.UDPTCP.Network
 	c.raddr = *config.Output.UDPTCP.Raddr
 	c.config = &SocketConfig{maxBackoff: 30, maxRetries: 10}
 
-	if (config.Bool("output.udp_tcp.tls.enable", 0) == true) {
+	if (*config.Output.UDPTCP.TlsConfig.Enable == true) {
 
 		c.network = "tcp"
 		// load client cert
 		cert, err := tls.LoadX509KeyPair(*config.Output.UDPTCP.TlsConfig.CertPath, *config.Output.UDPTCP.TlsConfig.KeyPath)
-		if (err) {
-			fmt.Printf("%v", err)
+		if err != nil {
+			return err
 		}
 
 		// load CA
 		caCert, err := ioutil.ReadFile(*config.Output.UDPTCP.TlsConfig.CaPath)
 		if err != nil {
-			fmt.Printf("%v", err)
+			return err
 		}
 
 		caCertPool := x509.NewCertPool()
@@ -69,12 +69,12 @@ func (c *SocketClient) Init(config *cfg.Config) {
 		c.tlsConfig = &tls.Config{}
 	}
 
-	//todo (gpolaert) handler errors and tls
+	return nil
 }
 
 func (socket *SocketClient) Connect() (error) {
 
-	fmt.Fprintf(os.Stderr, "Connection to %s (%s)\n", socket.raddr, socket.network)
+	logrus.Infof("Connection to %s (%s)\n", socket.raddr, socket.network)
 
 	var conn Connection
 	var err error
@@ -104,7 +104,7 @@ func (socket *SocketClient) WriteAndRetry(payload []byte) (error) {
 		// backoff mechanism
 		backoffTime := int(math.Min(math.Pow(float64(i), 2), float64(socket.config.maxBackoff)));
 		if (backoffTime > 0) {
-			fmt.Fprintf(os.Stderr, "Making a new attempt in %d seconds (%d/%d)\n", backoffTime, i, socket.config.maxRetries);
+			logrus.Warnf("Making a new attempt in %d seconds (%d/%d)", backoffTime, i, socket.config.maxRetries);
 		}
 
 		time.Sleep(time.Duration(backoffTime) * time.Second)
@@ -117,7 +117,7 @@ func (socket *SocketClient) WriteAndRetry(payload []byte) (error) {
 			// reconnect
 			err := socket.reconnect();
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Unable to connect, error: %v\n", err)
+				logrus.Errorf("Unable to connect, error: %v", err)
 				socket.Close()
 				continue
 			}
@@ -127,7 +127,7 @@ func (socket *SocketClient) WriteAndRetry(payload []byte) (error) {
 
 		err := socket.writeOnce(payload)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to write, error: %v\n", err)
+			logrus.Errorf("Unable to write, error: %v", err)
 			continue
 		}
 
@@ -135,7 +135,7 @@ func (socket *SocketClient) WriteAndRetry(payload []byte) (error) {
 
 	}
 
-	return errors.New(fmt.Sprintf("Failed to connect to %s (%s)", socket.raddr, socket.network))
+	return fmt.Errorf("Failed to connect to %s (%s)", socket.raddr, socket.network)
 }
 
 func (socket *SocketClient) writeOnce(payload []byte) (error) {

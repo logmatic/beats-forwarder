@@ -9,7 +9,7 @@ type SyslogClient struct {
 	writer *syslog.Writer
 }
 
-func (c *SyslogClient) Init(config *cfg.Config) {
+func (c *SyslogClient) Init(config *cfg.Config) error {
 
 	network := config.Output.Syslog.Network
 
@@ -18,6 +18,8 @@ func (c *SyslogClient) Init(config *cfg.Config) {
 	} else {
 		c.writer, _ = syslog.New(syslog.LOG_INFO, *config.Output.Syslog.Tag)
 	}
+	//todo (@gpolaert) handles errors
+	return nil
 
 }
 

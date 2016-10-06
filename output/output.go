@@ -4,7 +4,7 @@ import cfg "github.com/logmatic/beats-forwarder/config"
 
 // Interface that all outputs should be implemented
 type Output  interface {
-	Init(*cfg.Config)
+	Init(*cfg.Config) error
 	Connect() error
 	WriteAndRetry([]byte) error
 	Close()
@@ -18,8 +18,11 @@ type OutputImplementer struct {
 func Run(impl Output, config *cfg.Config) (Output, error) {
 
 	remote := OutputImplementer{impl}
-	remote.Init(config)
-	err := remote.Connect()
+	err := remote.Init(config)
+	if err != nil {
+		return nil, err
+	}
+	err = remote.Connect()
 	return remote, err
 
 }
