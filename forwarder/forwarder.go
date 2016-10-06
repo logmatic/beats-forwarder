@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/elastic/go-lumber/server"
-
+	"github.com/Sirupsen/logrus"
 	"github.com/logmatic/beats-forwarder/output"
 	cfg "github.com/logmatic/beats-forwarder/config"
+
 	"crypto/tls"
 	"io/ioutil"
 	"crypto/x509"
+	"errors"
 )
 
 var Registry map[string]output.Output
@@ -30,23 +32,67 @@ func init() {
 
 func Run(config *cfg.Config) error {
 
-	outputType := *config.Output.Type
+	var out output.Output
+	if config.Output.Type != nil {
+		out = Registry[*config.Output.Type]
+	} else {
+		return errors.New("Config error: output.type not set")
+	}
+
+	if out == nil {
+		return errors.New("Config error: output.type '" + *config.Output.Type + "' is unknown")
+	}
 
 	// start the remote connection
-	fmt.Printf("Register '%s' as the remote output\n", outputType)
-	remote, err := output.Run(Registry[outputType], config)
+	logrus.Infof("Register '%s' as the remote output", *config.Output.Type)
+	remote, err := output.Run(out, config)
 	if err != nil {
 		return err
 	}
 
+
+	// todo (gpolaert) factorize
+	input_port := 5044
+	input_host := "0.0.0.0"
+	input_lj_v1 := false
+	input_lj_v2 := true
+	input_keepalive := 3
+	input_timeout := 30
+
+	if config.Input.Host != nil {
+		input_host = *config.Input.Host
+	}
+
+	if config.Input.Port != nil {
+		input_port = *config.Input.Port
+	}
+
+	if config.Input.LJ.V1 != nil {
+		input_lj_v1 = *config.Input.LJ.V1
+	}
+
+	if config.Input.LJ.V2 != nil {
+		input_lj_v2 = *config.Input.LJ.V2
+	}
+
+	if config.Input.Keepalive != nil {
+		input_keepalive = *config.Input.Keepalive
+	}
+
+	if config.Input.Timeout != nil {
+		input_timeout = *config.Input.Timeout
+	}
+
+
+
 	// start the listener
 	local, err := server.ListenAndServe(
-		fmt.Sprintf("%s:%d", *config.Input.Host, *config.Input.Port),
-		server.V1(*config.Input.LJ.V1),
-		server.V2(*config.Input.LJ.V2),
-		server.Keepalive(time.Duration(*config.Input.Keepalive) * time.Second),
-		server.Timeout(time.Duration(*config.Input.Timeout) * time.Second),
-		server.TLS(digestTLSConfig))
+		fmt.Sprintf("%s:%d", input_host, input_port),
+		server.V1(input_lj_v1),
+		server.V2(input_lj_v2),
+		server.Keepalive(time.Duration(input_keepalive) * time.Second),
+		server.Timeout(time.Duration(input_timeout) * time.Second),
+		server.TLS(getTLSConfig(config)))
 
 	if err != nil {
 		return err
@@ -66,7 +112,7 @@ func Run(config *cfg.Config) error {
 	// main loop
 	for batch := range local.ReceiveChan() {
 
-		fmt.Printf("Received batch of %v events\n", len(batch.Events))
+		logrus.Debugf("Received batch of %v events", len(batch.Events))
 		payload := new(bytes.Buffer)
 
 		for _, beat := range batch.Events {
@@ -82,10 +128,12 @@ func Run(config *cfg.Config) error {
 
 }
 
-func digestTLSConfig(config *cfg.Config) *tls.Config {
+func getTLSConfig(config *cfg.Config) *tls.Config {
 
-	tlsConfig := &tls.Config{}
-	if (config.Bool("input.tls.enable", 0) == true) {
+	if (*config.Input.TlsConfig.Enable == true) {
+
+		tlsConfig := &tls.Config{}
+		logrus.Infof("Setting an encrypted communication for the input")
 
 		// load client cert
 		cert, err := tls.LoadX509KeyPair(*config.Input.TlsConfig.CertPath, *config.Input.TlsConfig.KeyPath)
@@ -107,9 +155,11 @@ func digestTLSConfig(config *cfg.Config) *tls.Config {
 		tlsConfig.RootCAs = caCertPool
 
 		tlsConfig.BuildNameToCertificate()
+		return tlsConfig
 	}
 
-	return Input
+	return nil
+
 }
 
 

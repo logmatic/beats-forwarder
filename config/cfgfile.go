@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/elastic/go-ucfg"
@@ -18,29 +17,29 @@ var configfile *string
 func init() {
 
 	configfile = flag.String("c", "etc/config.yml", "Configuration file")
+	flag.Bool("d", false, "Enable debug logs")
 
 }
 
-func ChangeDefaultCfgfileFlag(beatName string) error {
-
-	cliflag := flag.Lookup("c")
-	if cliflag == nil {
-		return fmt.Errorf("Flag -c not found")
+func Read(out interface{}, path string) error {
+	// default config
+	err := internalRead(out, "etc/config.yml")
+	if (err!=nil){
+		return err
 	}
-
-	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return fmt.Errorf("Failed to set default config file location because the absolute path to %s could not be obtained. %v", os.Args[0], err)
+	// user-override
+	if (*configfile != flag.Lookup("c").DefValue) {
+		err := internalRead(out, "")
+		if (err!=nil){
+			return err
+		}
 	}
-
-	cliflag.DefValue = filepath.Join(path, beatName + ".yml")
-
-	return cliflag.Value.Set(cliflag.DefValue)
+	return nil
 }
 
 // Read reads the configuration from a yaml file into the given interface structure.
 // In case path is not set this method reads from the default configuration file for the beat.
-func Read(out interface{}, path string) error {
+func internalRead(out interface{}, path string) error {
 
 	if path == "" {
 		path = *configfile
@@ -82,13 +81,10 @@ func expandEnv(config []byte) []byte {
 			if (strings.HasPrefix(v, "$")) {
 				v = os.Getenv(v[1:])
 			}
-			//fmt.Printf("Replacing config environment variable '${%s}' with " +
-			//"default '%s'\n", key, v)
-		} else {
-			//fmt.Printf("Replacing config environment variable '${%s}' with '%s'\n",
-			//	key, v)
 		}
 
 		return v
 	}))
 }
+
+
