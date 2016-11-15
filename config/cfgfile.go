@@ -22,6 +22,7 @@ func init() {
 }
 
 func Read(out interface{}, path string) error {
+
 	// default config
 	err := internalRead(out, "etc/config.yml")
 	if (err!=nil){
