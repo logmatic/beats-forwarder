@@ -16,7 +16,7 @@ input:
   # Timeout setting, by default 30 seconds
   timeout: ${BFWD_TIMEOUT:30}
 
-  # LumberJack protocol settingss
+  # LumberJack protocol settings
   lj:
     # By default, lj-v1 protocol is disabled.
     V1: ${BFWD_LJ_V1:false}
@@ -73,7 +73,7 @@ output:
     # Tag or application reported for each log
     tag: ${BFWD_SYSLOG_TAG:beats-fowarder}
 
-    # Protocol connection, if empty, the local syslog is used
+    # Protocol connection (udp or tcp), if empty, the local syslog is used
     network: ${BFWD_SYSLOG_NETWORK}
 
     # The remote endpoint, only if a protocol has been specified
@@ -82,7 +82,7 @@ output:
   # Logmatic specific settings
   logmatic:
 
-    # The Logmatic API Key for authentification
+    # The Logmatic API Key for authentication
     key: ${BFWD_LOGMATIC_API_KEY}
 
     # Protocol connection (tcp|ssl), by default ssl
