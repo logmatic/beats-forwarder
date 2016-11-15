@@ -1,13 +1,7 @@
 # beats-forwarder
 A simple forwarder to send beats everywhere through udp, tcp, syslog and third-party
 
-
-
-
-## How-to use it
-
-### Installation
-
+## How-to use
 ### Installation
 Notice that we've released a docker version: get the docker [beats-forwarder]() image
 Download the last version of the beats-forwarder ([all versions available]()):
@@ -25,9 +19,10 @@ chmod +x beats-forwarder
 Beats-forwarder use a Yaml file as configuration. By default, beats-forwarder listens on
 all interfaces of the server and use 5044 as port. Beats are forwarder to the local syslog.
 Beats-forwarder allows you to ship them to:
-* A syslog server (local or remote)
-* A tcp/udp endpoint (secure or not)
-* Logmatic.io
+
+* A [syslog server](docs/forwarder/syslog.md) (local or remote)
+* A [tcp/udp endpoint](docs/forwarder/tcp_udp.md)  (secure or not)
+* To [Logmatic.io](docs/forwarder/logmatic.md) 
 
 The default configuration can be found here: [config.yaml](logmatic/beats-forwarder/blob/dev/etc/config.yml)
 Create a new file, `beats-fwdr.yaml` and set these attributes at least (it's a
@@ -72,8 +67,8 @@ Here we are!
 Now, just configure your already existing beats to send them to the forwarder.
 
 ### Beats configuration
-All you need to do is to add and configure the logstash output for each beat.s
-Edit `beatsname-config.yml` and add at the end the following code:
+All you need to do is to add and configure the logstash output for each beat.
+Edit `metricbeat-config.yml` and add at the end the following code:
 
 ```yaml
 output:
