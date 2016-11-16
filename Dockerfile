@@ -11,4 +11,9 @@ WORKDIR $GOPATH/src/github.com/logmatic/beats-forwarder
 
 
 # Install deps and build
-RUN go build && ls -l
+RUN glide install && go build
+
+
+# Ports
+EXPOSE 5044
+ENTRYPOINT ["./beats-forwarder"]
