@@ -72,14 +72,3 @@ Here are the env vars used to configure the plugin:
 * Path to the CERT file:  `BFWD_ENABLE_TLS_CERT_PATH`
 * Path to the Key file:  `BFWD_ENABLE_TLS_KEY_PATH`
 
-
-### Example to Logmatic.io
-
-
-```
-mkdir demo-tcp && cd demo-tcp
-
-# Get files
-
-
-```

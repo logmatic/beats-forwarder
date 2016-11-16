@@ -1,10 +1,23 @@
 # beats-forwarder
 A simple forwarder to send beats everywhere through udp, tcp, syslog and third-party
 
+## Quick and dirty: send beats to Logmatic.io
+```sh
+LOGMATIC_KEY=<YOUR_LOGMATIC_KEY>
+docker run -dt \
+    -p 5044:5044 \
+    -e BFWD_OUTPUT_TYPE=logmatic \
+    -e BFWD_LOGMATIC_API_KEY=$LOGMATIC_KEY \
+    --name beats-forwarder \
+    logmatic/beats-forwarder
+```
+
+
 ## How-to use
 ### Installation
 Notice that we've released a docker version: get the docker [beats-forwarder]() image
-Download the last version of the beats-forwarder ([all versions available]()):
+Download the last version of the beats-forwarder ([all versions available]())
+
 
 ```sh
 # linux 64
