@@ -15,14 +15,14 @@ docker run -dt \
 
 ## How-to use
 ### Installation
-Notice that we've released a docker version: get the docker [beats-forwarder]() image
-Download the last version of the beats-forwarder ([all versions available]())
+Notice that we've released a docker version: get the docker [beats-forwarder](https://hub.docker.com/r/logmatic/beats-forwarder/) image
+Download the last version of the beats-forwarder ([all versions available](https://github.com/logmatic/beats-forwarder/releases))
 
 
 ```sh
 # linux 64
 mkdir -p beats-forwarder/etc && cd beats-forwarder
-curl -OL https://github.com/logmatic/beats-forwarder/releases/download/v0.1-alpha/beats-forwarder
+curl -OL https://github.com/logmatic/beats-forwarder/releases/download/v0.1-rc1/beats-forwarder
 cd etc && curl -OL https://raw.githubusercontent.com/logmatic/beats-forwarder/dev/etc/config.yml
 cd ..
 chmod +x beats-forwarder
