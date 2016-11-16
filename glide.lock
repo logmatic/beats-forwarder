@@ -1,5 +1,5 @@
 hash: edde022c2e4d523beb91ad20768a21fbfbb675a81608b029bf7fc866f01f57ed
-updated: 2016-09-19T15:10:41.811964401+02:00
+updated: 2016-11-16T15:55:32.011586973+01:00
 imports:
 - name: github.com/elastic/go-lumber
   version: 616041e345fc33c97bc0eb0fa6b388aa07bca3e1
@@ -13,16 +13,22 @@ imports:
   - server/v1
   - server/v2
 - name: github.com/elastic/go-ucfg
-  version: f68e111e1035a51815b85556e4682c1cb4009b58
+  version: 38aaa83e094af5fd992dc3ef343166c0d1fc4a2a
   subpackages:
   - yaml
 - name: github.com/klauspost/compress
-  version: 08fe86a420401e830c24114bdf9f1ba91331407a
+  version: e3b7981a12dd3cab49afa1d3a50e715846f23732
   subpackages:
   - flate
   - zlib
 - name: github.com/klauspost/cpuid
   version: 09cded8978dc9e80714c4d85b0322337b0a1e5e0
+- name: github.com/Sirupsen/logrus
+  version: abc6f20dabf4b10195f233ad21ea6c5ba33acae0
+- name: golang.org/x/sys
+  version: b699b7032584f0953262cb2788a0ca19bb494703
+  subpackages:
+  - unix
 - name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []
