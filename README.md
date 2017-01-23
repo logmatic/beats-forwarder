@@ -26,6 +26,13 @@ curl -OL https://github.com/logmatic/beats-forwarder/releases/download/v0.1-rc1/
 cd etc && curl -OL https://raw.githubusercontent.com/logmatic/beats-forwarder/dev/etc/config.yml
 cd ..
 chmod +x beats-forwarder
+
+# windows
+# download the lastest version and go to the installation directory
+mkdir etc/
+# add the https://raw.githubusercontent.com/logmatic/beats-forwarder/dev/etc/config.yml file into the etc/dir
+./beats-forwarder -c <your_config>
+ 
 ```
 
 ### Configuration
