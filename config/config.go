@@ -51,9 +51,14 @@ type OutputLogmaticConfig struct {
 	Raddr   *string
 }
 
+
+type OutputHTTPConfig struct {
+	Endpoint *string
+}
 type OutputConfig struct {
 	Type     *string
 	UDPTCP   OutputUdpTcpConfig       `config:"udp_tcp"`
 	Syslog   OutputSyslogConfig       `config:"syslog"`
 	Logmatic OutputLogmaticConfig     `config:"logmatic"`
+	HTTP     OutputHTTPConfig         `config:"http"`
 }

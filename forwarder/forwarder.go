@@ -27,6 +27,7 @@ func init() {
 	Registry["syslog"] = &output.SyslogClient{}
 	Registry["logmatic"] = &output.LogmaticClient{}
 	Registry["udp_tcp"] = &output.SocketClient{}
+	Registry["http"] = &output.HTTPClient{}
 
 }
 

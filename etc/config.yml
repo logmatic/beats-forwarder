@@ -41,7 +41,7 @@ input:
 
 output:
 
-  # The wanted output, by default syslog
+    # The wanted output (syslog|udp_tcp|http|logmatic), by default syslog
   type: ${BFWD_OUTPUT_TYPE:syslog}
 
   # UDP and TCP settings
@@ -91,4 +91,9 @@ output:
     # The remote endpoint
     raddr: ${BFWD_LOGMATIC_RADDR:"api.logmatic.io:10515"}
 
+  # HTTP specific settings
+  http:
+
+    # The remote endpoint
+    endpoint: ${BFWD_HTTP_ENDPOINT}
 
